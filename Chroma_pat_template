@@ -1,0 +1,16 @@
+/////////////////////////////////////////////
+//      Viktor Converter                   //
+//      Version : <script_ver>             //
+/////////////////////////////////////////////
+
+SET_DEC_FILE "<DEC_File>"
+HEADER
+<PIN_CHANNELS>;
+
+
+SPM_PATTERN ( <PATTERN_NAME> ) {
+
+<VECTOR>
+
+
+}
