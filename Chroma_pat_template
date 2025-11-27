@@ -1,5 +1,5 @@
 /////////////////////////////////////////////
-//      Viktor Converter                   //
+//      Vektor Converter                   //
 //      Version : <script_ver>             //
 /////////////////////////////////////////////
 
@@ -11,6 +11,5 @@ HEADER
 SPM_PATTERN ( <PATTERN_NAME> ) {
 
 <VECTOR>
-
 
 }
