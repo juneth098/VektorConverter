@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e42c2a34-62d5-402a-bc0b-d502a364a8d1" name="Changes" comment="TST to Chroma Pat">
-      <change beforePath="$PROJECT_DIR$/.idea/ViktorConverter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ViktorConverter.iml" afterDir="false" />
+    <list default="true" id="e42c2a34-62d5-402a-bc0b-d502a364a8d1" name="Changes" comment="working converter tst2chroma">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Chroma_pat_template" beforeDir="false" afterPath="$PROJECT_DIR$/Chroma_pat_template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tst2chroma.py" beforeDir="false" afterPath="$PROJECT_DIR$/tst2chroma.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tst2chroma.py" beforeDir="false" afterPath="$PROJECT_DIR$/vec2chroma.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,6 +51,7 @@
     "Python.main.executor": "Run",
     "Python.stil2vcd.executor": "Run",
     "Python.tst2chroma.executor": "Run",
+    "Python.vec2chroma.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -100,7 +99,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764147510572</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="working converter tst2chroma">
+      <option name="closed" value="true" />
+      <created>1764234033008</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1764234033008</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -109,7 +116,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="initial" />
     <MESSAGE value="TST to Chroma Pat" />
-    <option name="LAST_COMMIT_MESSAGE" value="TST to Chroma Pat" />
+    <MESSAGE value="working converter tst2chroma" />
+    <option name="LAST_COMMIT_MESSAGE" value="working converter tst2chroma" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ViktorConverter$main.coverage" NAME="main Coverage Results" MODIFIED="1761555794959" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

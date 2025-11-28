@@ -1,6 +1,9 @@
 import os
 import sys
 
+author = "Juneth Viktor Ellon Moreno"
+sub_script_ver = "0.01"
+
 def extract_vec_data(vec_file, num_pins=1):
     vector_lines = []
     current_comment = ""
@@ -86,7 +89,7 @@ def fill_template(template_file, output_file, vector_data, script_ver="1.0",
 
     print(f"Output written to {output_file}")
 
-def convert_vec_file(vec_file, cmf_file, dec_file, template_file, file_extension, script_ver="0.01"):
+def convert_vec_file(vec_file, cmf_file, dec_file, template_file, file_extension, script_ver=sub_script_ver):
     pin_channels = read_cmf_file(cmf_file)
     num_pins = len(pin_channels.split(',')) if pin_channels else 1
     vector_data = extract_vec_data(vec_file, num_pins=num_pins)
@@ -101,6 +104,14 @@ def convert_vec_file(vec_file, cmf_file, dec_file, template_file, file_extension
                   pattern_name=base_name)
 
 if __name__ == "__main__":
+    print("#############################################################")
+    print("#\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#")
+    print("#\t\t\t\t\t\tVektorConverter\t\t\t\t\t\t#")
+    print(f"#\t\t\t\t\t\tvec2chroma {sub_script_ver}\t\t\t\t\t\t#")
+    print(f"#\t\t\t\t\tby: {author}\t\t\t#")
+    print(f"#\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#")
+    print("##############################################################")
+
     # Strip quotes and spaces from user input
     vec_input = input("Enter .vec file or directory: ").strip().strip('"').strip("'")
     vec_input = os.path.abspath(vec_input)
