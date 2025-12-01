@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e42c2a34-62d5-402a-bc0b-d502a364a8d1" name="Changes" comment="working converter tst2chroma">
+    <list default="true" id="e42c2a34-62d5-402a-bc0b-d502a364a8d1" name="Changes" comment="added minor updates: add introductions/header">
+      <change afterPath="$PROJECT_DIR$/tst2vec.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/vcd2vec.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tst2chroma.py" beforeDir="false" afterPath="$PROJECT_DIR$/vec2chroma.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,6 +52,7 @@
     "Python.main.executor": "Run",
     "Python.stil2vcd.executor": "Run",
     "Python.tst2chroma.executor": "Run",
+    "Python.vcd2vec.executor": "Run",
     "Python.vec2chroma.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
@@ -107,7 +109,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764234033008</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="added minor updates: add introductions/header">
+      <option name="closed" value="true" />
+      <created>1764320067063</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1764320067063</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -117,7 +127,8 @@
     <MESSAGE value="initial" />
     <MESSAGE value="TST to Chroma Pat" />
     <MESSAGE value="working converter tst2chroma" />
-    <option name="LAST_COMMIT_MESSAGE" value="working converter tst2chroma" />
+    <MESSAGE value="added minor updates: add introductions/header" />
+    <option name="LAST_COMMIT_MESSAGE" value="added minor updates: add introductions/header" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ViktorConverter$main.coverage" NAME="main Coverage Results" MODIFIED="1761555794959" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
