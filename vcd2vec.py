@@ -1,6 +1,7 @@
 # Copyright (c) 2025 Juneth Viktor Ellon Moreno
 # All rights reserved
 import re
+import os
 
 author = "Juneth Viktor Ellon Moreno"
 sub_script_ver = "0.01"
@@ -14,7 +15,30 @@ VALUE_MAP = {
     'l': '0', 'L': '0'
 }
 
+# ---------------------- CMF Generation ----------------------
+def generate_cmf_from_vcd(vcd_file, cmf_file=None):
+    pins = []
+    with open(vcd_file, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith("$var"):
+                # $var <type> <size> <symbol> <pin_name> $end
+                parts = line.split()
+                if len(parts) >= 5:
+                    pin_name = " ".join(parts[4:-1])  # handle spaces in pin name
+                    pins.append(pin_name)
 
+    if not cmf_file:
+        cmf_file = os.path.splitext(vcd_file)[0] + ".cmf"
+
+    with open(cmf_file, "w") as f:
+        for idx, pin in enumerate(pins):
+            f.write(f"{pin},{idx},T2,USE\n")
+
+    print(f"CMF file generated: {cmf_file}")
+    return cmf_file
+
+# ---------------------- VCD to VEC Functions ----------------------
 def parse_header_info(filename):
     date = ""
     version = ""
@@ -39,13 +63,11 @@ def parse_header_info(filename):
                 continue
 
             if stripped.startswith("$comment") and "Csum" in stripped:
-                # format: $comment Csum: 1 aaaaaaaa $end
                 m = re.search(r"Csum:\s*(.+)\s*\$end", stripped)
                 if m:
                     csum = m.group(1)
                 continue
 
-            # Handle block content
             if in_block == "date" and stripped != "$end":
                 date = stripped
             elif in_block == "version" and stripped != "$end":
@@ -53,22 +75,18 @@ def parse_header_info(filename):
             elif in_block == "timescale" and stripped != "$end":
                 timescale = stripped
 
-            # Block end
             if stripped == "$end":
                 in_block = None
-
-            # Stop reading header after definitions
             if stripped == "$enddefinitions":
                 break
 
     return date, version, timescale, csum
 
-
 def parse_vcd(filename):
-    symbols = []          # maintain order: [(symbol, pinname)]
-    sym_to_index = {}     # symbol -> index
-    value_now = {}        # symbol -> last known value
-    timed_changes = {}    # time -> list of (symbol, val)
+    symbols = []
+    sym_to_index = {}
+    value_now = {}
+    timed_changes = {}
 
     time = 0
     in_dump = False
@@ -76,54 +94,34 @@ def parse_vcd(filename):
     with open(filename, "r") as f:
         for line in f:
             line = line.strip()
-
-            # -------------------------------------------
-            # Parse pin header
-            # -------------------------------------------
             if line.startswith("$var"):
                 parts = line.split()
                 symbol = parts[3]
-                pin = parts[4]
+                pin = " ".join(parts[4:-1]) if len(parts) > 5 else parts[4]
                 sym_to_index[symbol] = len(symbols)
                 symbols.append((symbol, pin))
                 continue
-
-            # -------------------------------------------
-            # Time marker
-            # -------------------------------------------
             if line.startswith("#"):
                 time = int(line[1:])
                 if time not in timed_changes:
                     timed_changes[time] = []
                 in_dump = False
                 continue
-
-            # -------------------------------------------
-            # Dumpvars
-            # -------------------------------------------
             if line == "$dumpvars":
                 in_dump = True
                 if 0 not in timed_changes:
                     timed_changes[0] = []
                 continue
-
             if line == "$end" and in_dump:
                 in_dump = False
                 continue
-
-            # -------------------------------------------
-            # Value change
-            # -------------------------------------------
             m = re.match(r"([01xXzZhHlL])(.+)", line)
             if m:
                 raw_val, symbol = m.groups()
                 symbol = symbol.strip()
-
                 if symbol not in sym_to_index:
                     continue
-
                 val = VALUE_MAP.get(raw_val, "X")
-
                 if in_dump:
                     timed_changes[0].append((symbol, val))
                     value_now[symbol] = val
@@ -131,21 +129,12 @@ def parse_vcd(filename):
                     if value_now.get(symbol) != val:
                         value_now[symbol] = val
                         timed_changes[time].append((symbol, val))
-
     return symbols, timed_changes
-
 
 def build_state_at_times(symbols, timed_changes, interval):
     all_times = sorted(timed_changes.keys())
     max_time = max(all_times)
-
-    target_times = []
-    n = 1
-    while n * interval <= max_time:
-        target_times.append(n * interval)
-        n += 1
-
-    # Build cumulative state
+    target_times = [n * interval for n in range(1, max_time // interval + 1)]
     state = {sym: "X" for sym, _ in symbols}
     vec_rows = []
 
@@ -157,44 +146,41 @@ def build_state_at_times(symbols, timed_changes, interval):
             for sym, val in timed_changes.get(event_time, []):
                 state[sym] = val
             event_time = next(changes_iter, None)
-
         row = "".join(state[sym] for sym, _ in symbols)
         vec_rows.append((t, row))
 
     return vec_rows
 
-
+# ---------------------- Main Script ----------------------
 def main():
     vcd_file = input("Enter VCD file path: ").strip()
     interval = int(input("Enter timing interval (e.g. 41665): ").strip())
-    # Output filename: remove the input extension
+
+    # Generate CMF file
+    cmf_file = generate_cmf_from_vcd(vcd_file)
+
+    # Output vec file
     if "." in vcd_file:
-        out_file = vcd_file.rsplit(".", 1)[0] + ".vec"
+        vec_file = vcd_file.rsplit(".", 1)[0] + ".vec"
     else:
-        out_file = vcd_file + ".vec"
+        vec_file = vcd_file + ".vec"
 
-    # Extract header info
     date, version, timescale, csum = parse_header_info(vcd_file)
-
     symbols, timed_changes = parse_vcd(vcd_file)
 
-    # Resolve initial state from #0
+    # initial state
     init_state = {sym: "X" for sym, _ in symbols}
     for sym, val in timed_changes.get(0, []):
         init_state[sym] = val
 
-    # Generate interval vectors
     vec_rows = build_state_at_times(symbols, timed_changes, interval)
-
-    # Frequency: F = 1 / (interval * timescale)
-    # timescale is like "1ps"
     ts_num = int(re.match(r"(\d+)", timescale).group(1))
-    freq = int(1e12 / (interval * ts_num))  # In Hz
+    freq = int(1e12 / (interval * ts_num))
 
-    # Write output file
-    with open(out_file, "w") as f:
+    # Write vec file
+    with open(vec_file, "w") as f:
         f.write("########################################################\n")
-        f.write(f"# Generated by VektorConverter: vec2chroma v{sub_script_ver} \n")
+        f.write(f"# Generated by VektorConverter: vcd2vec v{sub_script_ver}\n")
         f.write(f"# VCD : {vcd_file}\n")
         f.write(f"# Date {date}\n")
         f.write(f"# Version: {version}\n")
@@ -204,28 +190,21 @@ def main():
         f.write(f"# User Input Timing : {interval}x{timescale}\n")
         f.write(f"# Calculated Frequency : {freq} Hz\n")
         f.write("########################################################\n")
-
-        # #0 row
         row0 = "".join(init_state[sym] for sym, _ in symbols)
-        f.write("#0\n")
-        f.write("0 " + row0 + "\n")
-
-        # timed rows
+        f.write("#0\n0 " + row0 + "\n")
         idx = 1
         for t, row in vec_rows:
-            f.write(f"#{t}\n")
-            f.write(f"{idx} {row}\n")
+            f.write(f"#{t}\n{idx} {row}\n")
             idx += 1
 
-    print("Output written:", out_file)
-
+    print("VEC file written:", vec_file)
+    print("CMF file written:", cmf_file)
 
 if __name__ == "__main__":
     print("#############################################################")
     print("#\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#")
     print("#\t\t\t\t\t\tVektorConverter\t\t\t\t\t\t#")
-    print(f"#\t\t\t\t\t\tvcd2vec v{sub_script_ver}\t\t\t\t\t\t#")
+    print(f"#\t\t\t\t\t\tvcd2vec + cmf v{sub_script_ver}\t\t\t\t\t#")
     print(f"#\t\t\t\t\tby: {author}\t\t\t#")
-    print(f"#\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#")
     print("##############################################################")
     main()

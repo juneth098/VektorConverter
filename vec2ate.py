@@ -7,6 +7,13 @@ from datetime import datetime
 author = "Juneth Viktor Ellon Moreno"
 sub_script_ver = "0.01"
 
+# --- Allowed logic characters ---
+ALLOWED_LOGIC = {'0', '1', 'X', 'L', 'H'}
+
+def sanitize_vector(data):
+    """Allow only 1,0,X,L,H. Other characters become X."""
+    return ''.join(c if c.upper() in ALLOWED_LOGIC else 'X' for c in data)
+
 # --- Vector extraction functions ---
 def extract_vec_data_chroma(vec_file, num_pins=1):
     vector_lines = []
@@ -26,11 +33,10 @@ def extract_vec_data_chroma(vec_file, num_pins=1):
             parts = line.split()
             if len(parts) < 2:
                 continue
-            data = parts[1]
+            data = sanitize_vector(parts[1])
 
             if first_line_of_section:
                 if current_comment and first_vector_line:
-                    # Only one semicolon at the end of the bitstring
                     formatted = f"   *{data}*   TS1;//{current_comment}"
                     first_vector_line = False
                 else:
@@ -69,7 +75,7 @@ def extract_vec_data_j750(vec_file, num_pins=1):
             parts = line.split()
             if len(parts) < 2:
                 continue
-            data = parts[1]
+            data = sanitize_vector(parts[1])
 
             if first_in_section:
                 vectors.append((data, current_comment))
@@ -93,6 +99,7 @@ def extract_vec_data_j750(vec_file, num_pins=1):
     return "\n".join(out)
 
 
+# --- CMF file reader ---
 def read_cmf_file(cmf_file):
     pins = []
     try:
@@ -119,6 +126,8 @@ def read_cmf_file(cmf_file):
     print(f"Collected pins: {pin_list}")
     return pin_list
 
+
+# --- Generate HEADER_PINS ---
 def generate_header_pins(pin_channels, max_chars=8, num_lines=8, dummy_count=0):
     """
     Generate vertical HEADER_PINS for template.
@@ -150,6 +159,7 @@ def generate_header_pins(pin_channels, max_chars=8, num_lines=8, dummy_count=0):
     return "\n".join(lines)
 
 
+# --- Fill template ---
 def fill_template(template_file, output_file, vector_data, script_ver="99.9",
                   dec_file="DEC_FILE.DEC", pin_channels="PIN_CHANNELS",
                   pattern_name="PATTERN", input_file_path="INPUT.VEC",
@@ -175,6 +185,7 @@ def fill_template(template_file, output_file, vector_data, script_ver="99.9",
     print(f"Output written to {output_file}")
 
 
+# --- Convert vec file ---
 def convert_vec_file(vec_file, cmf_file, dec_file, template_file, file_extension, ate_type, script_ver=sub_script_ver):
     pin_channels = read_cmf_file(cmf_file)
     num_pins = len(pin_channels.split(',')) if pin_channels else 1
@@ -204,6 +215,7 @@ def convert_vec_file(vec_file, cmf_file, dec_file, template_file, file_extension
                   header_pins=header_pins)
 
 
+# --- Main execution ---
 if __name__ == "__main__":
     print("#############################################################")
     print("#\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#")
