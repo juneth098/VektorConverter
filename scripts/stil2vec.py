@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Juneth Viktor Ellon Moreno
+# All rights reserved
 import os
 import re
 from datetime import datetime
@@ -107,8 +109,8 @@ def main():
 
 if __name__ == "__main__":
     print("#############################################################")
-    print("#\t\t\t\t\t\tVektorConverter\t\t\t\t\t#")
-    print(f"#\t\t\t\t\t\tstil2vec + cmf v{sub_script_ver}\t\t#")
-    print(f"#\t\t\t\t\tby: {author}\t\t#")
+    print("#\t\t\t\t\t\tVektorConverter\t\t\t\t\t\t#")
+    print(f"#\t\t\t\t\t\tstil2vec + cmf v{sub_script_ver}\t\t\t\t#")
+    print(f"#\t\t\t\t\tby: {author}\t\t\t#")
     print("##############################################################")
     main()
