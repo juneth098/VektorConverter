@@ -44,7 +44,7 @@ def run_conversion(file_path, ate_type=None, dec_file=None, interval=None):
         print("ate2vec conversion done!")
 
         # If ate_type is specified, convert vec -> ATE
-        if ate_type in ["J750","C3380","C3850"]:
+        if ate_type != "VEC":
             template_file = "J750_pat_template" if ate_type.upper() == "J750" else "Chroma_pat_template"
             file_ext = ".atp" if ate_type.upper() == "J750" else ".pat"
             print(f"Converting {vec_file} -> {ate_type} using vec2ate...")
@@ -59,7 +59,7 @@ def run_conversion(file_path, ate_type=None, dec_file=None, interval=None):
         print("Processing STIL file with stil2vec...")
         vec_file, cmf_file = stil2vec.convert_stil_to_vec(file_path)
         print(f"VEC file: {vec_file}, CMF file: {cmf_file}")
-        if ate_type:
+        if ate_type != "VEC":
             template_file = "J750_pat_template" if ate_type.upper() == "J750" else "Chroma_pat_template"
             file_ext = ".atp" if ate_type.upper() == "J750" else ".pat"
             print(f"Converting {vec_file} -> {ate_type} using vec2ate...")
@@ -83,7 +83,7 @@ def run_conversion(file_path, ate_type=None, dec_file=None, interval=None):
                     print("Invalid input. Enter a positive integer for interval.")
         vec_file, cmf_file = vcd2vec.convert_vcd_to_vec(file_path, interval)
         print(f"VEC file: {vec_file}, CMF file: {cmf_file}")
-        if ate_type:
+        if ate_type != "VEC":
             template_file = "J750_pat_template" if ate_type.upper() == "J750" else "Chroma_pat_template"
             file_ext = ".atp" if ate_type.upper() == "J750" else ".pat"
             print(f"Converting {vec_file} -> {ate_type} using vec2ate...")
