@@ -75,13 +75,13 @@ class ConverterGUI(tk.Tk):
         tk.Label(self, text="Output Type:").pack(anchor="center", pady=5)
         self.output_frame = tk.Frame(self)
         self.output_frame.pack(anchor="center", pady=5)
-        for t in ["vec", "j750", "C3380", "C3850"]:
+        for t in ["vec", "j750", "C3380"]:#"C3850"]: for development
             rb = tk.Radiobutton(
-                self.output_frame, text=t.upper(),
-                variable=self.output_type, value=t,
-                command=self.check_dec_requirement,
-                state="disabled"
-            )
+        	self.output_frame, text=t.upper(),
+        	variable=self.output_type, value=t,
+        	command=self.check_dec_requirement,
+            state="normal"
+    	   )
             rb.pack(side="left", padx=10)
             self.output_buttons[t] = rb
 
@@ -186,7 +186,8 @@ class ConverterGUI(tk.Tk):
         input_type = self.input_type.get()
         requires_dec = False
 
-        if output_type in ["C3380", "C3850"]:
+        #if output_type in ["C3380", "C3850"]:
+        if output_type =="C3380":
             if (input_type == "ate" and input_ext in [".pat", ".atp"]) or input_type in ["vec", "stil", "vcd"]:
                 requires_dec = True
                 self.status_var.set("DEC file required")
@@ -230,8 +231,13 @@ class ConverterGUI(tk.Tk):
             messagebox.showerror("Error", f"Selected file ({input_ext}) does not match input type {input_type.upper()}")
             self.status_var.set("ERROR")
             return
-
+        #J750 atp to atp
         if input_type == "ate" and output_type == "J750" and input_ext == ".atp":
+            messagebox.showerror("Error", "Same file type conversion is not allowed")
+            self.status_var.set("ERROR")
+            return
+        #Chroma pat to pat
+        if input_type == "ate" and output_type == "C3380" and input_ext == ".pat":
             messagebox.showerror("Error", "Same file type conversion is not allowed")
             self.status_var.set("ERROR")
             return

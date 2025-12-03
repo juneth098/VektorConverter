@@ -45,13 +45,13 @@ def run_conversion(file_path, ate_type=None, dec_file=None, interval=None):
 
         # If ate_type is specified, convert vec -> ATE
         if ate_type != "VEC":
-            template_file = "J750_pat_template" if ate_type.upper() == "J750" else "Chroma_pat_template"
+            #template_file = "J750_pat_template" if ate_type.upper() == "J750" else "Chroma_pat_template"
             file_ext = ".atp" if ate_type.upper() == "J750" else ".pat"
             print(f"Converting {vec_file} -> {ate_type} using vec2ate...")
             vec2ate.convert_vec_file(vec_file, cmf_file, dec_file or "",
-                                     template_file=template_file,
                                      file_extension=file_ext,
-                                     ate_type=ate_type.upper())
+                                     ate_type=ate_type.upper(),
+                                     script_ver=sub_script_ver)
             print("vec2ate conversion done!")
 
     # --- STIL input ---
@@ -60,13 +60,13 @@ def run_conversion(file_path, ate_type=None, dec_file=None, interval=None):
         vec_file, cmf_file = stil2vec.convert_stil_to_vec(file_path)
         print(f"VEC file: {vec_file}, CMF file: {cmf_file}")
         if ate_type != "VEC":
-            template_file = "J750_pat_template" if ate_type.upper() == "J750" else "Chroma_pat_template"
+            #template_file = vec2ate.J750_TEMPLATE if ate_type.upper() == "J750" else vec2ate.CHROMA_TEMPLATE
             file_ext = ".atp" if ate_type.upper() == "J750" else ".pat"
             print(f"Converting {vec_file} -> {ate_type} using vec2ate...")
             vec2ate.convert_vec_file(vec_file, cmf_file, dec_file or "",
-                                     template_file=template_file,
                                      file_extension=file_ext,
-                                     ate_type=ate_type.upper())
+                                     ate_type=ate_type.upper(),
+                                     script_ver=sub_script_ver)
             print("vec2ate conversion done!")
 
     # --- VCD input ---
@@ -84,13 +84,13 @@ def run_conversion(file_path, ate_type=None, dec_file=None, interval=None):
         vec_file, cmf_file = vcd2vec.convert_vcd_to_vec(file_path, interval)
         print(f"VEC file: {vec_file}, CMF file: {cmf_file}")
         if ate_type != "VEC":
-            template_file = "J750_pat_template" if ate_type.upper() == "J750" else "Chroma_pat_template"
+            #template_file = vec2ate.J750_TEMPLATE if ate_type.upper() == "J750" else vec2ate.CHROMA_TEMPLATE
             file_ext = ".atp" if ate_type.upper() == "J750" else ".pat"
             print(f"Converting {vec_file} -> {ate_type} using vec2ate...")
             vec2ate.convert_vec_file(vec_file, cmf_file, dec_file or "",
-                                     template_file=template_file,
                                      file_extension=file_ext,
-                                     ate_type=ate_type.upper())
+                                     ate_type=ate_type.upper(),
+                                     script_ver=sub_script_ver)
             print("vec2ate conversion done!")
 
     # --- VEC input ---
@@ -99,12 +99,12 @@ def run_conversion(file_path, ate_type=None, dec_file=None, interval=None):
         if not ate_type:
             ate_type = input("Enter ATE type (J750,C3380,C3850): ").strip().upper()
         cmf_file = os.path.splitext(file_path)[0] + ".cmf"
-        template_file = "J750_pat_template" if ate_type.upper() == "J750" else "Chroma_pat_template"
+        #template_file = vec2ate.J750_TEMPLATE if ate_type.upper() == "J750" else vec2ate.CHROMA_TEMPLATE
         file_ext = ".atp" if ate_type.upper() == "J750" else ".pat"
         vec2ate.convert_vec_file(file_path, cmf_file, dec_file or "",
-                                 template_file=template_file,
                                  file_extension=file_ext,
-                                 ate_type=ate_type.upper())
+                                 ate_type=ate_type.upper(),
+                                 script_ver=sub_script_ver)
         print("vec2ate conversion done!")
 
     else:
