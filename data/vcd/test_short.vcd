@@ -1,0 +1,81 @@
+$date
+	Fri May 13 19:18:50 2022
+$end
+
+$version
+	Synopsys VCS version P-2019.06-SP1-1_Full64
+$end
+
+$timescale
+	1ps
+$end
+
+$comment Csum: 1 a1934ee7b245cb4a $end
+
+
+$scope module tb_top $end
+
+$scope module pt_test_dump $end
+$var reg 1 ! ADBUS0 $end
+$var reg 1 " ADBUS1 $end
+$var reg 1 # ADBUS2 $end
+$var reg 1 5 testmode_clk $end
+$var reg 1 C XSCO $end
+$var reg 1 6 EECLK $end
+$var reg 1 "! XTAL_SELECT_OE $end
+$upscope $end
+
+$upscope $end
+
+$enddefinitions $end
+
+#0
+$dumpvars
+x!
+x"
+x#
+0"!
+$end
+x!
+x"
+x#
+0"!
+#1427
+1!
+#2240
+0#
+0"!
+x5
+xC
+x6
+#41665
+15
+1C
+#83330
+1!
+1"
+1#
+z"!
+#100000
+16
+#124995
+15
+1C
+16
+1!
+#166660
+05
+0C
+06
+#208325
+15
+1C
+16
+#249990
+05
+0C
+06
+#291655
+15
+1C
+16
