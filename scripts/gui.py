@@ -3,20 +3,22 @@
 # All rights reserved
 
 import tkinter as tk
-from importlib.metadata import metadata
 from tkinter import filedialog, messagebox, simpledialog
 import os
-import threading
-import main  # your main.py with run_conversion()
+import main
 import metadata
 import webbrowser
+import logger
+import builtins
+from datetime import datetime
+
 
 class ConverterGUI(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title(f"VektorConverter v{metadata.script_ver}")
-        self.geometry("600x380")
-        self.resizable(False, False)
+
+        # Initialize logger once (console always on)
+        logger.init_logger()
 
         # Variables
         self.input_file = tk.StringVar()
@@ -24,14 +26,30 @@ class ConverterGUI(tk.Tk):
         self.output_type = tk.StringVar(value="vec")
         self.dec_file = None
         self.interval = None
+        self.logging_enabled = tk.BooleanVar(value=False)
 
         # Store radio buttons
         self.input_rbs = {}
         self.output_buttons = {}
         self.convert_button = None
 
+        self.title(f"VektorConverter v{metadata.script_ver}")
+        self.geometry("600x420")
+        self.resizable(False, False)
+
         self.create_widgets()
 
+        # Override print() for logging when checkbox is enabled
+        self.original_print = builtins.print
+        builtins.print = self.print_override
+
+        # Override status_var.set to log messages with timestamps
+        self.original_status_set = self._wrap_status_set()
+
+        # ---- Call cleanup logger on GUI close ----
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    # -------------------- Create Widgets --------------------
     def create_widgets(self):
         # Input File
         tk.Label(self, text="Vector File:").pack(anchor="center", pady=5)
@@ -45,8 +63,11 @@ class ConverterGUI(tk.Tk):
         self.input_frame = tk.Frame(self)
         self.input_frame.pack(anchor="center", pady=5)
         for t in ["ate", "stil", "vcd", "vec"]:
-            rb = tk.Radiobutton(self.input_frame, text=t.upper(), variable=self.input_type, value=t,
-                                state="disabled")  # Locked initially
+            rb = tk.Radiobutton(
+                self.input_frame, text=t.upper(),
+                variable=self.input_type, value=t,
+                state="disabled"
+            )
             rb.pack(side="left", padx=10)
             self.input_rbs[t] = rb
 
@@ -55,14 +76,26 @@ class ConverterGUI(tk.Tk):
         self.output_frame = tk.Frame(self)
         self.output_frame.pack(anchor="center", pady=5)
         for t in ["vec", "j750", "C3380", "C3850"]:
-            rb = tk.Radiobutton(self.output_frame, text=t.upper(), variable=self.output_type, value=t,
-                                command=self.check_dec_requirement, state="disabled")
+            rb = tk.Radiobutton(
+                self.output_frame, text=t.upper(),
+                variable=self.output_type, value=t,
+                command=self.check_dec_requirement,
+                state="disabled"
+            )
             rb.pack(side="left", padx=10)
             self.output_buttons[t] = rb
 
+        # Logging Checkbox
+        self.log_checkbox = tk.Checkbutton(
+            self, text="Enable Logging",
+            variable=self.logging_enabled,
+            command=self.toggle_logging
+        )
+        self.log_checkbox.pack(pady=5)
+
         # Convert Button
         self.convert_button = tk.Button(self, text="Convert", command=self.convert, state="disabled")
-        self.convert_button.pack(pady=20)
+        self.convert_button.pack(pady=10)
 
         # About Button
         self.about_button = tk.Button(self, text="About", command=self.show_about)
@@ -73,6 +106,36 @@ class ConverterGUI(tk.Tk):
         self.status_bar = tk.Label(self, textvariable=self.status_var, bd=1, relief="sunken", anchor="w")
         self.status_bar.pack(side="bottom", fill="x")
 
+    # -------------------- Logger toggle --------------------
+    def toggle_logging(self):
+        if self.logging_enabled.get():
+            logger.enable_file_logging()
+            self.status_var.set("Logging enabled")
+        else:
+            logger.disable_file_logging()
+            self.status_var.set("Logging disabled")
+
+    # -------------------- Override print --------------------
+    def print_override(self, *args, **kwargs):
+        self.original_print(*args, **kwargs)
+        if self.logging_enabled.get():
+            msg = " ".join(str(a) for a in args)
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            logger.log(f"{timestamp} | {msg}")
+
+    # -------------------- Wrap status_var.set --------------------
+    def _wrap_status_set(self):
+        orig_set = self.status_var.set
+
+        def new_set(value):
+            orig_set(value)
+            if self.logging_enabled.get():
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                logger.log(f"{timestamp} | STATUS: {value}")
+
+        self.status_var.set = new_set
+        return orig_set
+
     # -------------------- Browse and auto-detect --------------------
     def browse_file(self):
         self.status_var.set("Select Vector File")
@@ -80,8 +143,6 @@ class ConverterGUI(tk.Tk):
 
         if file:
             self.input_file.set(file)
-
-            # Auto-select input type based on file extension
             ext = os.path.splitext(file)[1].lower()
             if ext in [".atp", ".pat"]:
                 self.input_type.set("ate")
@@ -96,18 +157,15 @@ class ConverterGUI(tk.Tk):
                 messagebox.showerror("Error", f"Unsupported file type: {ext}")
                 return
 
-            # Lock input type radio buttons
             for rb in self.input_rbs.values():
                 rb.config(state="disabled")
 
-            # Enable output buttons and convert button
             for rb in self.output_buttons.values():
                 rb.config(state="normal")
             self.convert_button.config(state="disabled")
             self.update_output_options()
             self.check_dec_requirement()
             self.convert_button.config(state="normal")
-
 
     # -------------------- Update output options --------------------
     def update_output_options(self):
@@ -132,7 +190,6 @@ class ConverterGUI(tk.Tk):
             if (input_type == "ate" and input_ext in [".pat", ".atp"]) or input_type in ["vec", "stil", "vcd"]:
                 requires_dec = True
                 self.status_var.set("DEC file required")
-
                 self.convert_button.config(state="disabled")
 
         if requires_dec:
@@ -148,7 +205,6 @@ class ConverterGUI(tk.Tk):
             self.dec_file = f"./{os.path.basename(dec_file)}"
             self.convert_button.config(state="normal")
             self.status_var.set("Ready")
-
         else:
             self.dec_file = None
             self.status_var.set("Ready")
@@ -164,7 +220,6 @@ class ConverterGUI(tk.Tk):
         input_type = self.input_type.get()
         output_type = self.output_type.get().upper()
 
-        # Validate file vs input type
         valid_ext = {
             "ate": [".atp", ".pat"],
             "stil": [".stil"],
@@ -176,16 +231,13 @@ class ConverterGUI(tk.Tk):
             self.status_var.set("ERROR")
             return
 
-        # Same-type check (ATP → J750)
         if input_type == "ate" and output_type == "J750" and input_ext == ".atp":
             messagebox.showerror("Error", "Same file type conversion is not allowed")
             self.status_var.set("ERROR")
             return
 
-        # Handle VCD interval
         interval = None
         if input_type == "vcd":
-            self.status_var.set("Enter Timing")
             interval = simpledialog.askinteger(
                 "VCD Interval",
                 "Enter timing interval (ns, e.g. 41665):",
@@ -193,18 +245,25 @@ class ConverterGUI(tk.Tk):
             )
             if interval is None:
                 messagebox.showerror("Error", "Enter valid timing")
-                self.status_var.set("ERROR")
                 return
 
-        # ---------------- Run conversion ----------------
         try:
             main.run_conversion(file_path, ate_type=output_type, dec_file=self.dec_file, interval=interval)
+            self.status_var.set("Conversion completed successfully!")
             messagebox.showinfo("Success", "Conversion completed successfully!")
-            self.status_var.set("Done")
         except Exception as e:
-            messagebox.showerror("Error", f"Conversion failed:\n{e}")
             self.status_var.set("ERROR")
+            messagebox.showerror("Error", f"Conversion failed:\n{e}")
 
+    # -------------------- Close window --------------------
+    def on_close(self):
+        if self.logging_enabled.get():
+            logger.disable_file_logging()
+        builtins.print = self.original_print
+        self.status_var.set = self.original_status_set
+        self.destroy()
+
+    # -------------------- About window --------------------
     def show_about(self):
         try:
             author = metadata.author
@@ -215,13 +274,11 @@ class ConverterGUI(tk.Tk):
 
         github_url = "https://github.com/juneth098/VektorConverter"
 
-        # Create a new top-level window
         about_win = tk.Toplevel(self)
         about_win.title("About VektorConverter")
         about_win.resizable(False, False)
         about_win.geometry("400x200")
 
-        # Tool info
         info_text = (
             f"VektorConverter\n"
             f"Version: {version}\n\n"
@@ -230,7 +287,6 @@ class ConverterGUI(tk.Tk):
         )
         tk.Label(about_win, text=info_text, justify="left").pack(pady=(10, 5), padx=10, anchor="w")
 
-        # Clickable GitHub link
         def open_github(event):
             webbrowser.open_new(github_url)
 
@@ -238,8 +294,8 @@ class ConverterGUI(tk.Tk):
         link.pack(pady=(5, 10), padx=10, anchor="w")
         link.bind("<Button-1>", open_github)
 
-        # Close button
         tk.Button(about_win, text="Close", command=about_win.destroy).pack(pady=10)
+
 
 if __name__ == "__main__":
     app = ConverterGUI()
