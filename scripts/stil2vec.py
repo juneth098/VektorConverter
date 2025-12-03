@@ -1,20 +1,24 @@
+# stil2vec.py
 # Copyright (c) 2025 Juneth Viktor Ellon Moreno
 # All rights reserved
 import os
 import re
 from datetime import datetime
 
-author = "Juneth Viktor Ellon Moreno"
 sub_script_ver = "0.01"
 
+# Map STIL characters to allowed .vec characters
 VALUE_MAP = {
     '1': '1',
     '0': '0',
-    'x': 'X', 'X': 'X',
-    'z': 'X', 'Z': 'X',
-    'h': '1', 'H': '1',
-    'l': '0', 'L': '0',
-    'N': 'X'  # treat 'N' as X
+    'L': '0', 'l': '0',
+    'H': '1', 'h': '1',
+    'X': 'X', 'x': 'X',
+    'Z': 'X', 'z': 'X',
+    'N': 'X',
+    'U': 'X',
+    'D': 'X',
+    'T': 'X'
 }
 
 # ---------------- CMF ----------------
@@ -25,33 +29,39 @@ def generate_cmf_from_pins(pin_list, cmf_file):
             m = re.search(r'"([^"]+)"', pin)
             pin_name = m.group(1) if m else pin
             f.write(f"{pin_name},{idx},T2,USE\n")
-    print(f"CMF file generated: {cmf_file}")
     return cmf_file
 
 # ---------------- STIL Parsing ----------------
 def parse_stil_period(stil_file):
+    """Extract period from STIL Timing block"""
     period = None
     with open(stil_file, "r") as f:
         content = f.read()
-        # Search inside Timing -> WaveformTable for Period
-        match = re.search(r'Timing\s*\{.*?WaveformTable\s*"[^"]+"\s*\{.*?Period\s+[\'"]([\d\.]+)ns[\'"]', content, re.DOTALL | re.IGNORECASE)
+        match = re.search(
+            r'Timing\s*\{.*?WaveformTable\s*"[^"]+"\s*\{.*?Period\s+[\'"]([\d\.]+)ns[\'"]',
+            content,
+            re.DOTALL | re.IGNORECASE
+        )
         if match:
             period = match.group(1)
     return period
 
 def parse_stil_pins(stil_file):
-    pins = []
+    """Extract all signal names from STIL Signals block"""
     with open(stil_file, "r") as f:
         content = f.read()
         signals_match = re.search(r"Signals\s*\{(.*?)\}", content, re.DOTALL | re.IGNORECASE)
         if signals_match:
             signals_block = signals_match.group(1)
-            # Extract only pin names inside quotes
-            pins = re.findall(r'"([^"]+)"', signals_block)
-    return pins
+            return re.findall(r'"([^"]+)"', signals_block)
+    return []
+
+def sanitize_value(val):
+    """Ensure vector values are only L,H,0,1,X"""
+    return VALUE_MAP.get(val, 'X')
 
 def parse_stil_vectors(stil_file, pins):
-    """Return vector lines for STIL file based on pin order, recording changes."""
+    """Return vector lines for STIL file based on pin order, mapping all values to allowed characters"""
     state = {p: 'X' for p in pins}  # all pins default to X
     vectors = []
 
@@ -61,36 +71,31 @@ def parse_stil_vectors(stil_file, pins):
         v_blocks = re.findall(r'V\s*\{(.*?)\}', content, re.DOTALL | re.IGNORECASE)
         for block in v_blocks:
             # Update only pins listed in this block
-            for name, val in re.findall(r'"([^"]+)"\s*=\s*([01xXzZhHlLN]+);', block):
-                state[name] = VALUE_MAP.get(val, 'X')
+            for name, val in re.findall(r'"([^"]+)"\s*=\s*([^\s;]+);', block):
+                if name in state:
+                    state[name] = sanitize_value(val)
             # Build vector line in pin order
             vec_line = "".join(state[p] for p in pins)
             vectors.append(vec_line)
     return vectors
 
-# ---------------- Main ----------------
-def main():
-    stil_file = input("Enter STIL file path: ").strip()
-    stil_file = os.path.abspath(stil_file)
+# ---------------- Callable Function ----------------
+def convert_stil_to_vec(stil_file_path):
+    """Convert STIL file to .vec and .cmf; returns (vec_file, cmf_file)"""
+    stil_file = os.path.abspath(stil_file_path)
     base_name = os.path.splitext(os.path.basename(stil_file))[0]
 
-    # parse STIL
     period = parse_stil_period(stil_file)
     pins = parse_stil_pins(stil_file)
     vectors = parse_stil_vectors(stil_file, pins)
 
-    if not pins:
-        print("WARNING: No pins found, using generic names")
-        pins = [f"PIN{i}" for i in range(len(vectors[0]) if vectors else 1)]
+    if not pins and vectors:
+        pins = [f"PIN{i}" for i in range(len(vectors[0]))]
 
-    # CMF output
     cmf_file = os.path.join(os.path.dirname(stil_file), base_name + ".cmf")
     generate_cmf_from_pins(pins, cmf_file)
 
-    # Current timestamp
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    # VEC output
     vec_file = os.path.join(os.path.dirname(stil_file), base_name + ".vec")
     with open(vec_file, "w") as f:
         f.write("########################################################\n")
@@ -99,18 +104,8 @@ def main():
         if period:
             f.write(f"# Period   : {period} ns\n")
         f.write(f"# Timestamp: {timestamp}\n")
-        f.write("#\n")
         f.write("########################################################\n")
         for idx, vec in enumerate(vectors):
             f.write(f"{idx} {vec}\n")
 
-    print(f"VEC file generated: {vec_file}")
-    print(f"CMF file generated: {cmf_file}")
-
-if __name__ == "__main__":
-    print("#############################################################")
-    print("#\t\t\t\t\t\tVektorConverter\t\t\t\t\t\t#")
-    print(f"#\t\t\t\t\t\tstil2vec + cmf v{sub_script_ver}\t\t\t\t#")
-    print(f"#\t\t\t\t\tby: {author}\t\t\t#")
-    print("##############################################################")
-    main()
+    return vec_file, cmf_file
