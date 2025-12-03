@@ -1,0 +1,17 @@
+/////////////////////////////////////////////
+//      VektorConverter Chroma Template
+//      Version : <script_ver>
+//input file: <input_file>
+//time: <time_stamp>
+/////////////////////////////////////////////
+
+SET_DEC_FILE "<DEC_File>"
+HEADER
+<PIN_CHANNELS>;
+
+SPM_PATTERN ( <PATTERN_NAME> ) {
+<HEADER_PINS>
+
+<VECTOR>
+
+}
