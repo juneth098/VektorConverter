@@ -1,10 +1,16 @@
 # main.py
+# Copyright (c) 2025 Juneth Viktor Ellon Moreno
+# All rights reserved
 import os
 from datetime import datetime
 import ate2vec
 import stil2vec
 import vcd2vec
 import vec2ate
+import metadata
+
+author = metadata.author
+sub_script_ver = metadata.script_ver
 
 def run_conversion(file_path, ate_type=None, dec_file=None, interval=None):
     """
@@ -38,7 +44,7 @@ def run_conversion(file_path, ate_type=None, dec_file=None, interval=None):
         print("ate2vec conversion done!")
 
         # If ate_type is specified, convert vec -> ATE
-        if ate_type:
+        if ate_type in ["J750","C3380","C3850"]:
             template_file = "J750_pat_template" if ate_type.upper() == "J750" else "Chroma_pat_template"
             file_ext = ".atp" if ate_type.upper() == "J750" else ".pat"
             print(f"Converting {vec_file} -> {ate_type} using vec2ate...")

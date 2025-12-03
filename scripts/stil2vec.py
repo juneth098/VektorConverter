@@ -4,8 +4,10 @@
 import os
 import re
 from datetime import datetime
+import metadata
 
-sub_script_ver = "0.01"
+author = metadata.author
+sub_script_ver = metadata.script_ver
 
 # Map STIL characters to allowed .vec characters
 VALUE_MAP = {

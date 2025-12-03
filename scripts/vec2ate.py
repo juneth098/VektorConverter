@@ -1,11 +1,13 @@
+# vec2ate.py
 # Copyright (c) 2025 Juneth Viktor Ellon Moreno
 # All rights reserved
 import os
 import sys
 from datetime import datetime
+import metadata
 
-author = "Juneth Viktor Ellon Moreno"
-sub_script_ver = "0.01"
+author = metadata.author
+sub_script_ver = metadata.script_ver
 
 # --- Allowed logic characters ---
 ALLOWED_LOGIC = {'0', '1', 'X', 'L', 'H'}
