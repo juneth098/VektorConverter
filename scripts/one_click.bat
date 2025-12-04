@@ -19,6 +19,13 @@ if exist ".\dist" (
     echo "dist/ folder deleted"
 )
 
+REM Delete __pycache__ folder (optional, comment out if you want to keep the exe)
+if exist ".\__pycache__" (
+    rmdir /S /Q ".\__pycache__"
+    echo "__pycache__/ folder deleted"
+)
+
+
 REM Delete .spec file (optional)
 for %%f in (*.spec) do del /F /Q "%%f"
 
