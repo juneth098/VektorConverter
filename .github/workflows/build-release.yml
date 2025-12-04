@@ -42,15 +42,15 @@ jobs:
       # 6. Clean up PyInstaller build artifacts
       - name: Clean build folder
         run: |
-          if exist ".\build" rmdir /S /Q ".\build"
+          if (Test-Path ".\build") { Remove-Item ".\build" -Recurse -Force }
+
 
       - name: Clean dist folder
         run: |
-          if exist ".\dist" rmdir /S /Q ".\dist"
+          if (Test-Path ".\dist") { Remove-Item ".\dist" -Recurse -Force }
 
       - name: Delete spec files
-        run: |
-          del /F /Q *.spec
+        run: Remove-Item "*.spec" -Force
 
       # 7. Upload EXE as workflow artifact (optional)
       - name: Upload EXE artifact
