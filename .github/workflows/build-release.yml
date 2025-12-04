@@ -44,7 +44,6 @@ jobs:
         run: |
           if (Test-Path ".\build") { Remove-Item ".\build" -Recurse -Force }
 
-
       - name: Clean dist folder
         run: |
           if (Test-Path ".\dist") { Remove-Item ".\dist" -Recurse -Force }
@@ -52,28 +51,34 @@ jobs:
       - name: Delete spec files
         run: Remove-Item "*.spec" -Force
 
-      # 7. Upload EXE as workflow artifact (optional)
-      - name: Upload EXE artifact
+      # 7. Zip the EXE
+      - name: Package EXE as ZIP
+        run: |
+          powershell -Command "Compress-Archive -Path '.\VektorConverter.exe' -DestinationPath '.\VektorConverter.zip' -Force"
+          echo "EXE packaged into ZIP!"
+
+      # 8. Upload ZIP as workflow artifact (optional)
+      - name: Upload ZIP artifact
         uses: actions/upload-artifact@v4
         with:
           name: VektorConverter
-          path: VektorConverter.exe
+          path: VektorConverter.zip
 
   release:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      # 8. Download built EXE
-      - name: Download built EXE
+      # 9. Download built ZIP
+      - name: Download built ZIP
         uses: actions/download-artifact@v4
         with:
           name: VektorConverter
 
-      # 9. Publish GitHub Release
+      # 10. Publish GitHub Release
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: VektorConverter.exe
+          files: VektorConverter.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
