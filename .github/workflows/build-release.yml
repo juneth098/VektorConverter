@@ -1,0 +1,78 @@
+name: Build EXE and Release
+
+on:
+  push:
+    tags:
+      - 'v*'   # Trigger when pushing tags like v1.0
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install -r scripts/requirements.txt || echo "No requirements.txt found"
+          pip install pyinstaller
+
+      # 4. Build EXE with PyInstaller
+      - name: Build EXE
+        run: |
+          pyinstaller --onefile --name VektorConverter --windowed --icon=img/VektorConverter.ico scripts/gui.py
+          echo "Done conversion!"
+
+      # 5. Move EXE to repo root
+      - name: Move EXE to root
+        run: |
+          move ".\dist\VektorConverter.exe" ".\VektorConverter.exe"
+          echo "EXE is now at root path!"
+
+      # 6. Clean up PyInstaller build artifacts
+      - name: Clean build folder
+        run: |
+          if exist ".\build" rmdir /S /Q ".\build"
+
+      - name: Clean dist folder
+        run: |
+          if exist ".\dist" rmdir /S /Q ".\dist"
+
+      - name: Delete spec files
+        run: |
+          del /F /Q *.spec
+
+      # 7. Upload EXE as workflow artifact (optional)
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VektorConverter
+          path: VektorConverter.exe
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      # 8. Download built EXE
+      - name: Download built EXE
+        uses: actions/download-artifact@v4
+        with:
+          name: VektorConverter
+
+      # 9. Publish GitHub Release
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: VektorConverter.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
