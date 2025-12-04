@@ -36,7 +36,7 @@ jobs:
       # 5. Move EXE to repo root
       - name: Move EXE to root
         run: |
-          move ".\dist\VektorConverter.exe" ".\VektorConverter.exe"
+          powershell -Command "Move-Item -Path '.\dist\VektorConverter.exe' -Destination '.\VektorConverter.exe' -Force"
           echo "EXE is now at root path!"
 
       # 6. Clean up PyInstaller build artifacts
