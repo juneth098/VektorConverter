@@ -10,6 +10,16 @@ It is also capable of converting patterns from J750 to Chroma C3380 and vice ver
 
 ---
 
+## Download
+
+You can download the latest executable here:
+
+[Download VektorConverter.exe](https://github.com/juneth098/VektorConverter/releases)
+
+![Download](img/download.png)
+
+---
+
 ## 🗂️ Conversion Process
 The diagram below shows the flow from EDA inputs to ATE-ready outputs:  
 ![Conversion Process](img/process_flow.png)
@@ -84,7 +94,6 @@ VektorConverter/
 │   ├── vcd2vec.py          # format-specific convertersr
 │   └── vec2ate.py          # format-specific converters
 │
-├── VektorConverter.exe     # Pre‑compiled standalone executable
 └── README.md
    
 ```
