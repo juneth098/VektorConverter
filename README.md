@@ -97,6 +97,7 @@ VektorConverter/
 ```
 Run VektorConverter.exe
 ```
+![step1](img/1.png)
 
 ### 2. **Select input file**
 Click **Browse**, then choose:
@@ -105,7 +106,14 @@ Click **Browse**, then choose:
 - `.vcd`
 - `.vec`
 
+![step1](img/2.png)
+
 The tool auto‑detects the format and locks the input‑type selection.
+
+### 2.a. **If VCD is selected**
+Enter timing interval in nanoseconds.
+
+![step1](img/2a.png)
 
 ### 3. **Choose Output Format**
 - VEC
@@ -114,14 +122,23 @@ The tool auto‑detects the format and locks the input‑type selection.
 
 (Depending on input, some outputs may be disabled.)
 
-### 4. **If C3380 is selected**
+![step1](img/3.png)
+
+### 3.a. **If C3380 is selected**
 A prompt will ask for a **DEC** file.
 
-### 5. **If VCD is selected**
-Enter timing interval in nanoseconds.
+![step1](img/3a.png)
 
-### 6. **Click Convert**
+
+### (optional) 4. **Enable Log**
+It will generate `app.log` for debug purpose.
+
+![step1](img/4.png)
+
+### 5. **Click Convert**
 Converted output is generated into the same directory as the input (same input filename).
+
+![step1](img/5.png)
 
 ---
 
