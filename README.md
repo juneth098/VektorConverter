@@ -1,4 +1,6 @@
-# VektorConverter
+![VektorConverter](img/VektorConverter.ico)
+
+# VektorConverter 
 
 VektorConverter is a desktop GUI tool designed to convert various EDA vector formats into ATE‑ready pattern files for **Teradyne J750** and **Chroma C3380** testers.
 
@@ -8,6 +10,18 @@ It is also capable of converting patterns from J750 to Chroma C3380 and vice ver
 
 ---
 
+## 🗂️ Conversion Process
+The diagram below shows the flow from EDA inputs to ATE-ready outputs:  
+![Conversion Process](img/process_flow.png)
+
+1. IC Design provides patterns in `.stil` or `.vcd` formats.  
+2. `.tst` are legacy compressed patterns.  
+3. `.vec` and `.cmf` files are generated.  
+4. Convert to ATE patterns (`.atp`, `.pat`).  
+5. `.atp` and `.pat` can be converted back and forth.
+
+
+---
 ## 🚀 Features
 
 ### **✔ Multi‑format Input Support**
