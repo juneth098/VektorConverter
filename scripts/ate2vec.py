@@ -46,12 +46,17 @@ def parse_j750_atp_vectors(atp_file):
                 include_next_after_halt = True
                 continue
 
-            if line.startswith("> WFT"):
-                m = re.search(r"> WFT\s+([01XxLHZlhz]+);", line)
+            if re.match(r"^\s*>\s*WFT\b", line, re.I):
+                # Extract everything between WFT and ';'
+                m = re.search(r">\s*WFT([^;]+);", line, re.I)
                 if m:
-                    vec = sanitize_vector(m.group(1))
+                    raw_vec = m.group(1)  # "     1   1   0   0   Z   Z "
+                    raw_vec = raw_vec.replace(" ", "")  # "1100ZZ"
+                    vec = sanitize_vector(raw_vec)
+
                     comment_match = re.search(r";\s*//(.*)$", line)
                     comment = comment_match.group(1).strip() if comment_match else None
+
                     vectors.append((vec, comment))
 
     return vectors
@@ -139,7 +144,7 @@ def generate_cmf_file(pin_names, cmf_file):
 # -------------------- Main --------------------
 
 def main():
-    input_file = input("Enter .atp (J750) or .pat (Chroma) file: ").strip()
+    input_file = input("Enter .atp (J750) or .pat (Chroma) file: ").strip().strip('"')
     input_file = os.path.abspath(input_file)
     ext = os.path.splitext(input_file)[1].lower()
 

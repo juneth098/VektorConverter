@@ -102,6 +102,9 @@ def extract_vec_data_chroma(vec_file, num_pins=1):
     return "\n".join(vector_lines)
 
 def extract_vec_data_j750(vec_file, num_pins=1):
+    def spaced(bits):
+        return " ".join(bits)  # add spaces between characters
+
     vectors = []
     current_comment = None
     first_in_section = False
@@ -129,17 +132,23 @@ def extract_vec_data_j750(vec_file, num_pins=1):
 
     out = []
     for i, (bits, comment) in enumerate(vectors):
+        spaced_bits = spaced(bits)
         if comment:
-            out.append(f"       > WFT    {bits}; //{comment}")
+            out.append(f"       > WFT    {spaced_bits}; //{comment}")
         else:
-            out.append(f"       > WFT    {bits};")
+            out.append(f"       > WFT    {spaced_bits};")
+
+        # Insert halt before the last vector
         if i == len(vectors) - 2:
             out.append("halt")
 
-    dummy = "X" * len(vectors[-1][0])
+    # Dummy vector
+    last_len = len(vectors[-1][0])
+    dummy = " ".join(["X"] * last_len)
     out.append(f"       > WFT    {dummy}; //dummy vector")
 
     return "\n".join(out)
+
 
 # --- CMF reader ---
 def read_cmf_file(cmf_file):
@@ -187,6 +196,31 @@ def generate_header_pins(pin_channels, max_chars=8, num_lines=8, dummy_count=0):
 
     return "\n".join(lines)
 
+
+
+def space_out_header(header_text):
+    output = []
+    for line in header_text.split("\n"):
+
+        if not line.startswith("//"):
+            output.append(line)
+            continue
+
+        # strip leading //
+        content = line[2:]
+
+        # always preserve exactly the first 14 spaces
+        prefix = content[:14]
+        rest = content[14:]
+
+        # insert space between every character in the rest
+        spaced_rest = " ".join(list(rest))
+
+        # rebuild whole line
+        output.append("//" + prefix + spaced_rest)
+
+    return "\n".join(output)
+
 # --- Fill template ---
 def fill_template(template_str, output_file, vector_data, script_ver="99.9",
                   dec_file="DEC_FILE.DEC", pin_channels="PIN_CHANNELS",
@@ -227,6 +261,9 @@ def convert_vec_file(vec_file, cmf_file, dec_file="", file_extension=".vec", ate
         return
 
     header_pins = generate_header_pins(pin_channels, dummy_count=blank_header)
+    ##print(f"HEADER PINS\n{header_pins}\n")
+    if ate_type.upper() == "J750": header_pins= space_out_header(header_pins)
+    ##print(f"HEADER PINS\n{header_pins}\n")
     base_name = os.path.splitext(os.path.basename(vec_file))[0]
     output_file = os.path.join(os.path.dirname(vec_file), f"{base_name}{file_extension}")
 
