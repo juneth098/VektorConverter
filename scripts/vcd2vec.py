@@ -1,6 +1,4 @@
 # vcd2vec.py
-# Copyright (c) 2025 Juneth Viktor Ellon Moreno
-# All rights reserved
 import re
 import os
 import metadata

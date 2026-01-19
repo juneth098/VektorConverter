@@ -1,12 +1,10 @@
 # gui.py
-# Copyright (c) 2025 Juneth Viktor Ellon Moreno
-# All rights reserved
 
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 import os
 import main
-import metadata
+from metadata import info_text, script_ver, author as author_text
 import webbrowser
 import logger
 import builtins
@@ -26,7 +24,7 @@ class ConverterGUI(tk.Tk):
         self.input_file = tk.StringVar()
         self.input_type = tk.StringVar()
         self.output_type = tk.StringVar(value="vec")
-        self.dec_file = None
+        self.dec_file = tk.StringVar()
         self.interval = None
         self.logging_enabled = tk.BooleanVar(value=False)
 
@@ -35,7 +33,7 @@ class ConverterGUI(tk.Tk):
         self.output_buttons = {}
         self.convert_button = None
 
-        self.title(f"VektorConverter v{metadata.script_ver}")
+        self.title(f"VektorConverter v{script_ver}")
         self.geometry("600x420")
         self.resizable(False, False)
 
@@ -53,12 +51,22 @@ class ConverterGUI(tk.Tk):
 
     # -------------------- Create Widgets --------------------
     def create_widgets(self):
-        # Input File
-        tk.Label(self, text="Vector File:").pack(anchor="center", pady=5)
-        frame = tk.Frame(self)
-        frame.pack(anchor="center", pady=5)
-        tk.Entry(frame, textvariable=self.input_file, width=50).pack(side="left")
-        tk.Button(frame, text="Browse", command=self.browse_file).pack(side="left", padx=5)
+        # Vector File
+        # Vector File
+        frame_vec = tk.Frame(self)
+        frame_vec.pack(pady=5)
+
+        tk.Label(frame_vec, text="Vector File:", width=12, anchor="e").pack(side="left")
+        tk.Entry(frame_vec, textvariable=self.input_file, width=50).pack(side="left", padx=5)
+        tk.Button(frame_vec, text="...", command=self.browse_file).pack(side="left")
+
+        # Dec File
+        frame_dec = tk.Frame(self)
+        frame_dec.pack(pady=5)
+
+        tk.Label(frame_dec, text="Dec File:", width=12, anchor="e").pack(side="left")
+        tk.Entry(frame_dec, textvariable=self.dec_file, width=50).pack(side="left", padx=5)
+        tk.Button(frame_dec, text="...", command=self.browse_dec_file).pack(side="left")
 
         # Input Type
         tk.Label(self, text="Input Type:").pack(anchor="center", pady=5)
@@ -169,6 +177,13 @@ class ConverterGUI(tk.Tk):
             self.check_dec_requirement()
             self.convert_button.config(state="normal")
 
+    def browse_dec_file(self):
+        self.status_var.set("Select DEC File")
+        dec_file = filedialog.askopenfilename(title="Select DEC file", filetypes=[("DEC files", "*.dec")])
+
+        if dec_file:
+            self.dec_file.set(dec_file)
+            self.status_var.set("DEC file selected")
     # -------------------- Update output options --------------------
     def update_output_options(self):
         input_type = self.input_type.get()
@@ -184,33 +199,18 @@ class ConverterGUI(tk.Tk):
     # -------------------- DEC requirement --------------------
     def check_dec_requirement(self):
         output_type = self.output_type.get().upper()
-        input_ext = os.path.splitext(self.input_file.get())[1].lower()
-        input_type = self.input_type.get()
-        requires_dec = False
-
-        #if output_type in ["C3380", "C3850"]:
-        if output_type =="C3380":
-            if (input_type == "ate" and input_ext in [".pat", ".atp"]) or input_type in ["vec", "stil", "vcd"]:
-                requires_dec = True
-                self.status_var.set("DEC file required")
-                self.convert_button.config(state="disabled")
+        requires_dec = (output_type == "C3380")
 
         if requires_dec:
-            dec_file = filedialog.askopenfilename(title="Select DEC file")
-            if not dec_file:
-                messagebox.showerror("Error", "DEC file is required for Chroma conversion")
-                self.status_var.set("ERROR")
-                self.output_type.set("j750")
-                self.dec_file = None
+            self.status_var.set("DEC file required")
+            if not self.dec_file.get():
+                self.convert_button.config(state="disabled")
+            else:
                 self.convert_button.config(state="normal")
-                return
-            self.status_var.set("Processing DEC file...")
-            self.dec_file = f"./{os.path.basename(dec_file)}"
-            self.convert_button.config(state="normal")
-            self.status_var.set("Ready")
+
         else:
-            self.dec_file = None
-            self.status_var.set("Ready")
+            self.convert_button.config(state="normal")
+
 
     # -------------------- Convert button --------------------
     def convert(self):
@@ -249,14 +249,18 @@ class ConverterGUI(tk.Tk):
             interval = simpledialog.askinteger(
                 "VCD Interval",
                 "Enter timing interval (ns, e.g. 41665):",
-                minvalue=1
+                minvalue=1,
+                initialvalue=41665
             )
             if interval is None:
-                messagebox.showerror("Error", "Enter valid timing")
+                messagebox.showerror("Error", "Enter valid timing: must be greater than 1 ns")
                 return
 
+        dec_file_full_path = self.dec_file.get() or None
+        dec_file_path = f"./{os.path.basename(dec_file_full_path)}"
+
         try:
-            main.run_conversion(file_path, ate_type=output_type, dec_file=self.dec_file, interval=interval)
+            main.run_conversion(file_path, ate_type=output_type, dec_file=dec_file_path, interval=interval)
             self.status_var.set("Conversion completed successfully!")
             messagebox.showinfo("Success", "Conversion completed successfully!")
         except Exception as e:
@@ -274,8 +278,8 @@ class ConverterGUI(tk.Tk):
     # -------------------- About window --------------------
     def show_about(self):
         try:
-            author = metadata.author
-            version = metadata.script_ver
+            author = author_text
+            version = script_ver
         except AttributeError:
             author = "Unknown"
             version = "N/A"
@@ -287,12 +291,7 @@ class ConverterGUI(tk.Tk):
         about_win.resizable(False, False)
         about_win.geometry("400x200")
 
-        info_text = (
-            f"VektorConverter\n"
-            f"Version: {version}\n\n"
-            f"Copyright (c) 2025 {author}\n"
-            f"All rights reserved"
-        )
+
         tk.Label(about_win, text=info_text, justify="left").pack(pady=(10, 5), padx=10, anchor="w")
 
         def open_github(event):

@@ -1,6 +1,4 @@
 # stil2vec.py
-# Copyright (c) 2025 Juneth Viktor Ellon Moreno
-# All rights reserved
 import os
 import re
 from datetime import datetime

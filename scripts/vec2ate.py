@@ -1,6 +1,4 @@
 # vec2ate.py
-# Copyright (c) 2025 Juneth Viktor Ellon Moreno
-# All rights reserved
 import os
 from datetime import datetime
 import metadata

@@ -14,3 +14,10 @@ script_ver = "1.1"
 #      vec2ate.py - must contain at least 1 space between bits
 #      ate2vec.py - updated to detect the spaces between vectors
 # Verification: Done checking vec/cmf/.atp/pat. Tried the atp with PatternCompiler, no more issues
+
+info_text = (
+    f"VektorConverter\n"
+    f"Version: {script_ver}\n\n"
+    f"Copyright (c) 2026 {author}\n"
+    f"All rights reserved"
+)
