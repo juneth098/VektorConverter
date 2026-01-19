@@ -4,7 +4,7 @@
 import re
 import os
 import metadata
-import datetime
+from datetime import datetime
 
 author = metadata.author
 sub_script_ver = metadata.script_ver

@@ -12,6 +12,8 @@ import logger
 import builtins
 from datetime import datetime
 
+now = datetime.now()
+
 
 class ConverterGUI(tk.Tk):
     def __init__(self):
