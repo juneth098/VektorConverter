@@ -7,7 +7,7 @@ author = metadata.author
 sub_script_ver = metadata.script_ver
 
 # --- Allowed logic characters ---
-ALLOWED_LOGIC = {'0', '1', 'X', 'L', 'H'}
+ALLOWED_LOGIC = {'0', '1', 'X', 'L', 'H','P'} ##added P from tst - clock pulse > 1
 
 # --- Templates embedded in code ---
 J750_TEMPLATE = """\
@@ -51,11 +51,14 @@ SPM_PATTERN ( <PATTERN_NAME> ) {
 }
 """
 
-# --- Helper functions ---
 def sanitize_vector(data):
-    """Allow only 1,0,X,L,H. Other characters become X."""
-    return ''.join(c if c.upper() in ALLOWED_LOGIC else 'X' for c in data)
-
+    """P becomes 1, others stay if allowed, else X"""
+    return ''.join(
+        '1' if c.upper() == 'P' else
+        c if c.upper() in {'0','1','X','L','H'} else
+        'X'
+        for c in data
+    )
 # --- Vector extraction ---
 def extract_vec_data_chroma(vec_file, num_pins=1):
     vector_lines = []

@@ -52,7 +52,6 @@ class ConverterGUI(tk.Tk):
     # -------------------- Create Widgets --------------------
     def create_widgets(self):
         # Vector File
-        # Vector File
         frame_vec = tk.Frame(self)
         frame_vec.pack(pady=5)
 
